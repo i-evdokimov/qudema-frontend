@@ -29,7 +29,7 @@ const Home = () => {
 
         <div className="container mx-auto px-4 relative z-10 text-center md:text-left pointer-events-none">
           <div className="inline-block pointer-events-auto bg-white border-4 border-dark px-4 py-1 mb-6 shadow-[4px_4px_0px_0px_#000] transform -rotate-2">
-            <span className="font-black uppercase tracking-widest text-sm md:text-base">🚀 Подготовка к ЕГЭ 2024</span>
+            <span className="font-black uppercase tracking-widest text-sm md:text-base">Подготовка к ЕГЭ 2026</span>
           </div>
           
           <div className="pointer-events-auto">
