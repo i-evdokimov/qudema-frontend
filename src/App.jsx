@@ -1,42 +1,36 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast'; // Импортируем сам компонент уведомлений
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Импорт страниц (убедись, что пути правильные!)
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+// --- ВРЕМЕННЫЕ ЗАГЛУШКИ (Чтобы проверить, жив ли сам React) ---
+// Если с этим кодом сайт откроется, значит проблема была в импортах файлов
+const Home = () => <div className="p-10"><h1>🏠 Главная страница работает!</h1></div>;
+const Login = () => <div className="p-10"><h1>🔑 Страница Входа работает!</h1></div>;
+const Register = () => <div className="p-10"><h1>📝 Страница Регистрации работает!</h1></div>;
+const Dashboard = () => <div className="p-10"><h1>🚀 Личный кабинет работает!</h1></div>;
+// -------------------------------------------------------------
 
-// Компонент для защиты приватных маршрутов
+// Компонент защиты (оставляем как есть)
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-
-  if (loading) return <div className="flex justify-center items-center h-screen">Загрузка...</div>;
-  
-  if (!user) {
-    // Если не авторизован - на вход
-    return <Navigate to="/login" replace />;
-  }
-
+  if (loading) return <div className="p-10">Загрузка...</div>;
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 };
 
 function App() {
   return (
     <Router>
-      {/* Провайдер авторизации оборачивает всё */}
       <AuthProvider>
-        {/* Toaster нужен, чтобы работали уведомления. Без него будет ошибка "t is not a function" */}
-        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+        {/* Уведомления */}
+        <Toaster position="top-right" />
         
         <Routes>
-          {/* Публичные страницы */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
-          {/* Приватные страницы (только для вошедших) */}
+          
           <Route 
             path="/dashboard" 
             element={
@@ -46,7 +40,6 @@ function App() {
             } 
           />
           
-          {/* Если страница не найдена - на главную */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
