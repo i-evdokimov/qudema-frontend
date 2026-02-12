@@ -19,13 +19,11 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return;
     }
-
     try {
       const res = await fetch(`${API_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      
       if (data.success) {
         setUser(data.data || data.user);
       } else {
@@ -33,7 +31,6 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     } catch (err) {
-      console.error('Ошибка сессии:', err);
       localStorage.removeItem('token');
     } finally {
       setLoading(false);
@@ -53,12 +50,33 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem('token', data.data?.token || data.token);
       setUser(data.data?.user || data.user);
-      
-      toast.success('Успешный вход!'); // Только здесь вызываем тост
+      toast.success('С возвращением!');
       return { success: true };
     } catch (err) {
-      console.error(err);
-      toast.error(err.message || 'Ошибка');
+      toast.error(err.message);
+      return { success: false, message: err.message };
+    }
+  };
+
+  // ВОТ ЭТО МЫ ВЕРНУЛИ:
+  const register = async (userData) => {
+    try {
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+      const data = await res.json();
+
+      if (!data.success) throw new Error(data.message || 'Ошибка регистрации');
+
+      localStorage.setItem('token', data.data?.token || data.token);
+      setUser(data.data?.user || data.user);
+      
+      toast.success('Регистрация успешна!');
+      return { success: true };
+    } catch (err) {
+      toast.error(err.message);
       return { success: false, message: err.message };
     }
   };
@@ -69,14 +87,8 @@ export const AuthProvider = ({ children }) => {
     toast.success('Выход выполнен');
   };
 
-  const register = async (userData) => {
-      // Пока оставим простую заглушку, чтобы проверить вход
-      console.log("Registering:", userData);
-      return { success: true };
-  };
-
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, register }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
