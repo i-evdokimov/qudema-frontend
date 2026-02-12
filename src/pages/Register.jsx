@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
-import { User, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const Register = () => {
-  const navigate = useNavigate();
-  const { register } = useAuth();
-  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,154 +11,114 @@ const Register = () => {
     confirmPassword: ''
   });
   
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 1. Валидация
+    // Проверка паролей
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Пароли не совпадают');
+      toast.error('Пароли не совпадают!');
       return;
     }
+    
     if (formData.password.length < 6) {
       toast.error('Пароль должен быть длиннее 6 символов');
       return;
     }
 
-    setIsLoading(true);
+    setLoading(true);
+    
+    // Отправляем данные на сервер
+    const res = await register({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password
+    });
 
-    try {
-      // 2. Подготовка данных для бэкенда
-      // Бэкенд ждет firstName и lastName, а у нас одно поле name
-      const nameParts = formData.name.trim().split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ') || 'Student'; // Если фамилию не ввели
-
-      // 3. Отправка запроса через AuthContext
-      const result = await register({
-        firstName,
-        lastName,
-        email: formData.email,
-        password: formData.password,
-        role: 'student' // По умолчанию регистрируем как ученика
-      });
-
-      if (result.success) {
-        toast.success('Регистрация успешна! Добро пожаловать.');
-        navigate('/dashboard'); // Сразу в кабинет
-      } else {
-        toast.error(result.message || 'Ошибка при регистрации');
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('Что-то пошло не так. Попробуйте позже.');
-    } finally {
-      setIsLoading(false);
+    if (res.success) {
+      navigate('/dashboard');
     }
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] relative overflow-hidden p-4">
-      {/* Фон (Градиентные шары) */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px]" />
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white border-4 border-dark shadow-neo w-full max-w-md p-8 relative overflow-hidden">
+        
+        {/* Декоративный элемент - квадрат */}
+        <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-accent rounded-none border-4 border-dark rotate-12"></div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl relative z-10"
-      >
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-2">
-            Создать аккаунт
-          </h1>
-          <p className="text-gray-400 text-sm">Присоединяйся к Qudema и начни учиться</p>
-        </div>
+        <h2 className="text-4xl font-black uppercase mb-2">Регистрация</h2>
+        <p className="text-gray-500 font-bold mb-8">Начни свой путь к 100 баллам.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Имя */}
-          <div className="relative group">
-            <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+          <div>
+            <label className="block text-sm font-black uppercase mb-1">Имя</label>
             <input
               type="text"
-              name="name"
-              placeholder="Имя и Фамилия"
+              className="w-full border-4 border-dark p-3 font-bold focus:outline-none focus:shadow-[4px_4px_0px_0px_#000] transition-all"
+              placeholder="Твое имя"
               value={formData.name}
-              onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
               required
             />
           </div>
 
-          {/* Email */}
-          <div className="relative group">
-            <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+          <div>
+            <label className="block text-sm font-black uppercase mb-1">Email</label>
             <input
               type="email"
-              name="email"
-              placeholder="Email адрес"
+              className="w-full border-4 border-dark p-3 font-bold focus:outline-none focus:shadow-[4px_4px_0px_0px_#000] transition-all"
+              placeholder="name@example.com"
               value={formData.email}
-              onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
               required
             />
           </div>
 
-          {/* Пароль */}
-          <div className="relative group">
-            <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+          <div>
+            <label className="block text-sm font-black uppercase mb-1">Пароль</label>
             <input
               type="password"
-              name="password"
-              placeholder="Пароль"
+              className="w-full border-4 border-dark p-3 font-bold focus:outline-none focus:shadow-[4px_4px_0px_0px_#000] transition-all"
+              placeholder="Минимум 6 символов"
               value={formData.password}
-              onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
               required
             />
           </div>
 
-          {/* Подтверждение пароля */}
-          <div className="relative group">
-            <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+          <div>
+            <label className="block text-sm font-black uppercase mb-1">Повтори пароль</label>
             <input
               type="password"
-              name="confirmPassword"
-              placeholder="Повторите пароль"
+              className="w-full border-4 border-dark p-3 font-bold focus:outline-none focus:shadow-[4px_4px_0px_0px_#000] transition-all"
+              placeholder="••••••••"
               value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
               required
             />
           </div>
 
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-3 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={loading}
+            className="w-full bg-dark text-white font-black uppercase py-4 mt-4 border-4 border-transparent hover:bg-accent hover:text-dark hover:border-dark hover:shadow-neo transition-all active:translate-y-1"
           >
-            {isLoading ? (
-              <Loader2 className="animate-spin h-5 w-5" />
-            ) : (
-              <>
-                Зарегистрироваться <ArrowRight className="h-5 w-5" />
-              </>
-            )}
+            {loading ? 'Создаем аккаунт...' : 'Зарегистрироваться'}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-400">
+        <div className="mt-6 text-center text-sm font-bold z-10 relative">
           Уже есть аккаунт?{' '}
-          <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+          <Link to="/login" className="text-primary-600 hover:underline decoration-4 underline-offset-4">
             Войти
           </Link>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

@@ -2,14 +2,16 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
+// ИМПОРТИРУЕМ КОМПОНЕНТЫ
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop'; // <--- ДОБАВЬ ЭТО
 
+// Импорт страниц
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-// ИМПОРТИРУЕМ НОВЫЕ СТРАНИЦЫ
 import Courses from './pages/Courses';
 import About from './pages/About';
 
@@ -23,6 +25,8 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Router>
+      <ScrollToTop /> {/* <--- ВСТАВЬ ЭТО СЮДА (сразу после Router) */}
+      
       <AuthProvider>
         <div className="flex flex-col min-h-screen font-sans text-dark">
           <Navbar />
@@ -33,11 +37,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              
-              {/* ДОБАВЛЯЕМ МАРШРУТЫ */}
               <Route path="/courses" element={<Courses />} />
               <Route path="/about" element={<About />} />
-
               <Route 
                 path="/dashboard" 
                 element={
