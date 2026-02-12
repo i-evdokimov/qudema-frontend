@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
+import { toast } from 'react-hot-toast'; // Убедись, что импорт именно такой
 
-// Читаем переменную из настроек Netlify
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const AuthContext = createContext();
@@ -9,15 +9,30 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { checkUserLoggedIn(); }, []);
+  useEffect(() => {
+    checkUserLoggedIn();
+  }, []);
 
   const checkUserLoggedIn = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/auth/me`);
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
-      if (data.success) setUser(data.data); // В контроллере данные в data.data
-    } catch (err) { console.log('Не авторизован'); }
-    finally { setLoading(false); }
+      if (data.success) {
+        setUser(data.data || data.user);
+      }
+    } catch (err) {
+      console.error('Ошибка проверки сессии');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const login = async (email, password) => {
@@ -27,24 +42,39 @@ export const AuthProvider = ({ children }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
+
+      if (!data.success) {
+        throw new Error(data.message || 'Ошибка входа');
+      }
+
+      // Проверяем, где лежат данные (зависит от твоего контроллера)
+      const userData = data.data?.user || data.user;
+      const token = data.data?.token || data.token;
+
+      if (token) localStorage.setItem('token', token);
+      setUser(userData);
       
-      localStorage.setItem('token', data.data.token);
-      setUser(data.data.user);
+      toast.success('Успешный вход!');
       return { success: true };
-    } catch (err) { return { success: false, message: err.message }; }
+    } catch (err) {
+      toast.error(err.message);
+      return { success: false, message: err.message };
+    }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    toast.success('Вышли из системы');
   };
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
+
 export const useAuth = () => useContext(AuthContext);
