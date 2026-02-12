@@ -3,61 +3,22 @@
 @tailwind utilities;
 
 @layer components {
-  /* Класс для наших крутых кнопок */
   .btn-neo {
-    @apply inline-flex items-center justify-center border-4 border-dark font-black uppercase tracking-wide transition-all duration-200 cursor-pointer;
-    
-    /* Обычное состояние: Тень есть */
-    @apply shadow-neo; 
-    
-    /* При наведении: Чуть сдвигаем вверх (тень кажется больше) */
-    @apply hover:-translate-y-1;
-
-    /* При нажатии (Active): Убираем тень и сдвигаем вниз */
-    @apply active:translate-y-1 active:shadow-none;
+    @apply inline-flex items-center justify-center border-4 border-dark font-black uppercase transition-all shadow-neo hover:-translate-y-1 active:translate-y-1 active:shadow-none;
   }
 }
 
-/* --- Анимации --- */
-@keyframes fallAndRotate {
-  0% {
-    transform: translateY(-150px) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
+body {
+  @apply bg-gray-50 text-dark;
 }
 
-.animate-fall {
-  animation: fallAndRotate linear infinite;
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
-}
-
-@keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(-5%);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
-}
-
-.animate-bounce-slow {
-  animation: bounce-slow 3s infinite;
+.animate-marquee {
+  display: flex;
+  animation: marquee 30s linear infinite;
+  width: max-content;
 }
