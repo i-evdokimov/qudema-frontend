@@ -1,47 +1,66 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { FiAlertTriangle, FiArrowRight, FiLock } from 'react-icons/fi'; // Добавил иконки для красоты
 
 const Login = () => {
+  // --- ЛОГИКА (НЕ ТРОГАЛ) ---
   const [formData, setFormData] = useState({ email: '', password: '' });
   const { login } = useAuth();
   const navigate = useNavigate();
-  // Локальное состояние загрузки для этой формы
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Включаем загрузку
+    setIsLoading(true);
     
     const res = await login(formData.email, formData.password);
     
     if (res.success) {
       navigate('/dashboard');
     }
-    // Важно: если ошибка, выключаем загрузку. Если успех - нас перекинет на другую страницу.
     if (!res.success) {
        setIsLoading(false);
     }
   };
+  // ---------------------------
 
   return (
-    <div className="min-h-[calc(100vh-80px)] relative flex flex-col items-center justify-center p-4 overflow-hidden">
+    // Обертка с сеткой на фоне
+    <div className="min-h-[calc(100vh-80px)] relative flex items-center justify-center bg-gray-50 overflow-hidden">
+      
+      {/* Декоративная сетка */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+      </div>
 
-      {/* Основной контейнер формы (поверх фона) */}
-      <div className="relative z-10 w-full max-w-md">
-          <div className="bg-white border-4 border-dark shadow-neo p-8 relative overflow-hidden">
-            {/* Декоративный кружок */}
-            <div className="absolute -top-6 -right-6 w-20 h-20 bg-yellow-400 rounded-full border-4 border-dark animate-spin-slow"></div>
+      {/* Основной контейнер */}
+      <div className="relative z-10 w-full max-w-md px-4">
+          
+          {/* Декоративный "стикер" сверху */}
+          <div className="absolute -top-6 -left-2 z-20 bg-yellow-400 border-4 border-dark px-4 py-1 transform -rotate-0 shadow-neo">
+             <span className="font-black uppercase text-xs flex items-center gap-2">
+                <FiAlertTriangle /> Restricted Area
+             </span>
+          </div>
 
-            <h2 className="text-4xl font-black uppercase mb-2 relative">Вход</h2>
-            <p className="text-gray-500 font-bold mb-8 relative">С возвращением, гений.</p>
+          <div className="bg-white border-4 border-dark shadow-neo p-8 md:p-12 relative">
+            
+            <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-dark text-white mx-auto flex items-center justify-center text-3xl mb-4 border-4 border-transparent hover:bg-accent hover:text-dark hover:border-dark transition-colors cursor-help">
+                    <FiLock />
+                </div>
+                <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">ВХОД В СИСТЕМУ</h1>
+                <p className="font-bold text-gray-500 uppercase text-sm">Введите учетные данные</p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 relative">
-              <div>
-                <label className="block text-sm font-black uppercase mb-2">Email</label>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="block font-black uppercase text-xs tracking-widest ml-1">Email</label>
                 <input
                   type="email"
-                  className="w-full border-4 border-dark p-3 font-bold focus:outline-none focus:shadow-[4px_4px_0px_0px_#000] transition-all"
+                  placeholder="STUDENT@QUDEMA.RU"
+                  className="w-full bg-gray-50 border-4 border-dark p-4 font-bold uppercase placeholder:text-gray-300 focus:outline-none focus:bg-white focus:shadow-[4px_4px_0px_0px_#000] focus:-translate-y-1 transition-all"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
@@ -49,11 +68,15 @@ const Login = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-black uppercase mb-2">Пароль</label>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center ml-1">
+                    <label className="block font-black uppercase text-xs tracking-widest">Пароль</label>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase cursor-not-allowed hover:text-red-500">Забыл пароль?</span>
+                </div>
                 <input
                   type="password"
-                  className="w-full border-4 border-dark p-3 font-bold focus:outline-none focus:shadow-[4px_4px_0px_0px_#000] transition-all"
+                  placeholder="••••••••"
+                  className="w-full bg-gray-50 border-4 border-dark p-4 font-bold focus:outline-none focus:bg-white focus:shadow-[4px_4px_0px_0px_#000] focus:-translate-y-1 transition-all"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                   required
@@ -64,26 +87,30 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-primary-600 text-white font-black uppercase py-4 border-4 border-transparent hover:border-dark hover:bg-white hover:text-dark hover:shadow-neo transition-all active:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full btn-neo bg-primary-600 text-white hover:bg-accent hover:text-dark py-5 text-xl relative group overflow-hidden"
               >
-                Войти в систему
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                    {isLoading ? 'ПОДКЛЮЧЕНИЕ...' : 'ВОЙТИ'} 
+                    {!isLoading && <FiArrowRight />}
+                </span>
               </button>
             </form>
 
-            <div className="mt-6 text-center text-sm font-bold relative">
-              Нет аккаунта?{' '}
-              <Link to="/register" className="text-primary-600 hover:underline decoration-4 underline-offset-4">
-                Создать сейчас
+            {/* Футер карточки */}
+            <div className="mt-8 pt-6 border-t-4 border-gray-100 text-center">
+              <span className="font-bold text-gray-500 uppercase text-xs mr-2">Нет доступа?</span>
+              <Link to="/register" className="inline-block font-black uppercase border-b-4 border-accent hover:bg-accent hover:border-dark transition-all">
+                Создать аккаунт
               </Link>
             </div>
           </div>
 
-          {/* 3. Надпись "Reloading game..." ПОД ОКОШКОМ */}
+          {/* Анимация загрузки в стиле киберпанка */}
           {isLoading && (
-            <div className="mt-6 text-center animate-pulse">
-                <span className="inline-block bg-yellow-400 border-4 border-dark px-4 py-2 font-black uppercase text-dark shadow-neo transform -rotate-2">
-                    Reloading game...
-                </span>
+            <div className="mt-4 text-center">
+                <div className="inline-block bg-dark text-accent px-4 py-2 font-mono font-bold text-sm uppercase animate-pulse border-2 border-accent">
+                    {`> INITIALIZING_SESSION...`}
+                </div>
             </div>
           )}
       </div>

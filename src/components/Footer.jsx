@@ -8,7 +8,7 @@ const Footer = () => {
   const { user } = useAuth();
 
   return (
-    <footer className="bg-dark text-white border-t-4 border-dark pt-12 pb-6 mt-auto relative overflow-hidden">
+    <footer className="bg-dark text-white border-t-4 border-white pt-12 pb-6 mt-auto relative overflow-hidden">
       {/* Декоративный элемент в футере */}
       <div className="absolute top-0 left-1/4 w-32 h-32 bg-primary-600 rounded-full mix-blend-exclusion opacity-50 -translate-y-1/2 blur-xl pointer-events-none"></div>
 

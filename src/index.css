@@ -22,3 +22,131 @@ body {
   animation: marquee 30s linear infinite;
   width: max-content;
 }
+
+@layer utilities {
+  /* Анимация растягивания */
+  .animate-stretch {
+    transition: letter-spacing 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s ease;
+  }
+  .group:hover .animate-stretch {
+    letter-spacing: 0.15em;
+    transform: scaleX(1.05);
+  }
+
+  /* Эффект Glitch (Глюк) */
+  .glitch {
+    position: relative;
+  }
+
+  .glitch:hover::before,
+  .glitch:hover::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+  }
+
+  .glitch:hover::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+  }
+
+  .glitch:hover::after {
+    left: -2px;
+    text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+    animation: glitch-anim2 1s infinite linear alternate-reverse;
+  }
+
+  @keyframes glitch-anim {
+    0% { clip: rect(31px, 9999px, 94px, 0); }
+    20% { clip: rect(62px, 9999px, 42px, 0); }
+    40% { clip: rect(16px, 9999px, 78px, 0); }
+    60% { clip: rect(1px, 9999px, 13px, 0); }
+    80% { clip: rect(55px, 9999px, 49px, 0); }
+    100% { clip: rect(91px, 9999px, 98px, 0); }
+  }
+
+  @keyframes glitch-anim2 {
+    0% { clip: rect(65px, 9999px, 100px, 0); }
+    20% { clip: rect(30px, 9999px, 20px, 0); }
+    40% { clip: rect(10px, 9999px, 90px, 0); }
+    60% { clip: rect(40px, 9999px, 50px, 0); }
+    80% { clip: rect(80px, 9999px, 30px, 0); }
+    100% { clip: rect(15px, 9999px, 70px, 0); }
+  }
+}
+
+/* Растягивание при наведении */
+.animate-stretch {
+  transition: letter-spacing 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s ease;
+}
+.group:hover .animate-stretch {
+  letter-spacing: 0.12em; /* Буквы разъезжаются */
+  transform: scaleX(1.02);
+}
+
+/* Эффект Glitch (Взлом) */
+.glitch {
+  position: relative;
+}
+.glitch:hover::before,
+.glitch:hover::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+.glitch:hover::before {
+  left: 3px;
+  text-shadow: -3px 0 #ff00c1;
+  clip: rect(44px, 9999px, 56px, 0);
+  animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+.glitch:hover::after {
+  left: -3px;
+  text-shadow: -3px 0 #00fff9;
+  clip: rect(10px, 9999px, 30px, 0);
+  animation: glitch-anim2 3s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(10px, 9999px, 20px, 0); }
+  100% { clip: rect(80px, 9999px, 100px, 0); }
+}
+@keyframes glitch-anim2 {
+  0% { clip: rect(50px, 9999px, 60px, 0); }
+  100% { clip: rect(0px, 9999px, 40px, 0); }
+}
+
+/* Бегущая строка */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+@keyframes marquee-fast {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee-fast {
+  animation: marquee-fast 10s linear infinite;
+}
+
+/* Дополнительная тень для текста в Hero */
+.text-shadow-neo {
+  text-shadow: 4px 4px 0px #000;
+}

@@ -9,6 +9,7 @@ const QudemaBuddy = () => {
         mb-2 mr-2 bg-white border-4 border-dark p-3 font-black text-xs uppercase shadow-neo transition-all duration-300 transform
         ${isHovered ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'}
       `}>
+        Привет, я Кудемик!
         Есть вопросы? задай их сразу!
         <div className="absolute -bottom-3 right-6 w-4 h-4 bg-white border-r-4 border-b-4 border-dark rotate-45"></div>
       </div>

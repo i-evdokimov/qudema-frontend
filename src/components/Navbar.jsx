@@ -1,37 +1,49 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FiMenu, FiX, FiUser } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
+  const location = useLocation();
+
+  // Функция для проверки активной страницы
+  const isActive = (path) => location.pathname === path;
+
+  const linkStyles = (path) => 
+    `font-black uppercase tracking-tighter transition-all duration-300 px-3 py-1 border-2 ${
+      isActive(path) 
+        ? 'bg-accent border-dark shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' 
+        : 'border-transparent hover:text-accent'
+    }`;
 
   return (
-    <nav className="fixed w-full z-50 bg-white border-b-4 border-dark">
-      <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+    <nav className="fixed w-full top-0 left-0 z-[100] bg-white border-b-4 border-dark">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         
-        {/* ЛОГОТИП - ИСПРАВЛЕНО */}
-        <Link to="/" className="text-2xl font-black uppercase tracking-tighter flex items-center gap-2 select-none">
-          {/* Добавил flex-shrink-0, чтобы квадрат не плющило */}
-          <div className="w-8 h-8 bg-primary-600 border-2 border-dark flex-shrink-0"></div>
-          Qudema
+        {/* ЛОГОТИП */}
+        <Link to="/" className="text-3xl font-black uppercase tracking-tighter flex items-center gap-3 select-none group">
+          <div className="w-10 h-10 bg-accent border-4 border-dark flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform group-hover:-rotate-6">
+            Q
+          </div>
+          <span>Qudema</span>
         </Link>
 
-        {/* ОСТАЛЬНОЙ КОД БЕЗ ИЗМЕНЕНИЙ */}
-        <div className="hidden md:flex items-center gap-8 font-bold text-sm tracking-wide">
-          <Link to="/" className="hover:text-primary-600 transition-colors uppercase">Главная</Link>
-          <Link to="/courses" className="hover:text-primary-600 transition-colors uppercase">Курсы</Link>
-          <Link to="/about" className="hover:text-primary-600 transition-colors uppercase">О нас</Link>
+        {/* НАВИГАЦИЯ */}
+        <div className="hidden md:flex items-center gap-6">
+          <Link to="/" className={linkStyles('/')}>Главная</Link>
+          <Link to="/courses" className={linkStyles('/courses')}>Курсы</Link>
+          <Link to="/about" className={linkStyles('/about')}>О нас</Link>
         </div>
 
         <div className="hidden md:flex items-center gap-4">
             {user ? (
-                <Link to="/dashboard" className="flex items-center gap-2 btn-neo bg-accent text-dark px-6 py-1 text-sm">
-                    <FiUser /> {user.name}
+                <Link to="/dashboard" className="flex items-center gap-2 btn-neo bg-accent text-dark px-6 py-1 text-sm border-2 border-dark">
+                    <FiUser /> Кабинет
                 </Link>
             ) : (
-                <Link to="/login" className="btn-neo btn-secondary px-6 py-1 text-sm">
+                <Link to="/login" className="btn-neo bg-white border-4 border-dark px-6 py-1 text-sm font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-accent transition-colors">
                     ВОЙТИ
                 </Link>
             )}
@@ -41,18 +53,6 @@ const Navbar = () => {
           {isOpen ? <FiX /> : <FiMenu />}
         </button>
       </div>
-
-      {isOpen && (
-        <div className="md:hidden bg-white border-t-4 border-dark absolute w-full left-0 py-8 px-4 flex flex-col gap-6 text-xl font-black uppercase shadow-neo">
-           <Link to="/" onClick={() => setIsOpen(false)}>Главная</Link>
-           <Link to="/courses" onClick={() => setIsOpen(false)}>Курсы</Link>
-           {user ? (
-             <Link to="/dashboard" onClick={() => setIsOpen(false)} className="text-primary-600">Личный кабинет</Link>
-           ) : (
-             <Link to="/login" onClick={() => setIsOpen(false)} className="text-primary-600">Войти</Link>
-           )}
-        </div>
-      )}
     </nav>
   );
 };
