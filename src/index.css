@@ -2,64 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* -- ТВОЙ КАСТОМНЫЙ CSS НИЖЕ -- */
+@layer components {
+  /* Класс для наших крутых кнопок */
+  .btn-neo {
+    @apply inline-flex items-center justify-center border-4 border-dark font-black uppercase tracking-wide transition-all duration-200 cursor-pointer;
+    
+    /* Обычное состояние: Тень есть */
+    @apply shadow-neo; 
+    
+    /* При наведении: Чуть сдвигаем вверх (тень кажется больше) */
+    @apply hover:-translate-y-1;
 
-body {
-  background-color: #f8fafc;
-  /* Сетка на фоне */
-  background-image:  radial-gradient(#06b6d4 0.5px, transparent 0.5px), radial-gradient(#06b6d4 0.5px, #f8fafc 0.5px);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
+    /* При нажатии (Active): Убираем тень и сдвигаем вниз */
+    @apply active:translate-y-1 active:shadow-none;
+  }
 }
 
-/* Классы кнопок */
-.btn-neo {
-  @apply px-6 py-3 font-bold uppercase tracking-wider border-2 border-dark shadow-neo transition-all active:shadow-neo-hover active:translate-x-[2px] active:translate-y-[2px];
-}
-
-.btn-primary {
-  @apply bg-primary-500 text-white hover:bg-primary-400;
-}
-
-.btn-secondary {
-  @apply bg-white text-dark hover:bg-gray-100;
-}
-
-/* Тень для текста */
-.text-shadow-neo {
-  text-shadow: 2px 2px 0px #18181b;
-  color: white;
-}
-
-/* АНИМАЦИЯ БЕГУЩЕЙ СТРОКИ */
-@keyframes marquee {
+/* --- Анимации --- */
+@keyframes fallAndRotate {
   0% {
-    transform: translateX(0%);
+    transform: translateY(-150px) rotate(0deg);
+    opacity: 1;
   }
   100% {
-    /* Сдвигаем на 50%, так как мы дублируем контент */
-    transform: translateX(-50%);
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
   }
 }
 
-.animate-marquee-infinite {
-  display: flex;
-  width: fit-content;
-  /* 30s - время одного полного цикла, linear - равномерная скорость */
-  animation: marquee 30s linear infinite;
+.animate-fall {
+  animation: fallAndRotate linear infinite;
 }
 
-@keyframes fallAndRotate {
-    0% {
-      transform: translateY(-100vh) rotate(0deg);
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(100vh) rotate(360deg);
-      opacity: 0;
-    }
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
   }
-  
-  .animate-fall {
-    animation: fallAndRotate linear infinite;
+  to {
+    transform: rotate(360deg);
   }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(-5%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s infinite;
+}
