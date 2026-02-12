@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 // 👇 ИСПРАВЛЕНИЕ: Жестко задаем правильный адрес API с '/api' на конце
 // Теперь не важно, есть .env файл или нет — будет работать везде.
-const API_URL = 'https://qudema-backend.onrender.com/api';
+const API_URL = 'https://api.qudema.com/api';
 
 const AuthContext = createContext();
 
