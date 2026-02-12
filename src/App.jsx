@@ -1,68 +1,56 @@
-import { Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast'; // <--- ИМПОРТ
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast'; // Импортируем сам компонент уведомлений
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import ScrollToTop from './components/ScrollToTop';
-
+// Импорт страниц (убедись, что пути правильные!)
 import Home from './pages/Home';
-import Courses from './pages/Courses';
-import CourseDetail from './pages/CourseDetail';
-import About from './pages/About';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 
+// Компонент для защиты приватных маршрутов
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div className="flex justify-center items-center h-screen">Загрузка...</div>;
+  
+  if (!user) {
+    // Если не авторизован - на вход
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-white text-dark">
-      <ScrollToTop />
-      
-      {/* НАСТРОЙКА УВЕДОМЛЕНИЙ (TOASTS) */}
-      <Toaster 
-        position="top-center"
-        toastOptions={{
-          className: '',
-          style: {
-            border: '3px solid #1e293b', // Черная рамка
-            padding: '16px',
-            color: '#1e293b',
-            fontWeight: 'bold',
-            borderRadius: '0px', // Острые углы
-            boxShadow: '4px 4px 0px 0px #000', // Тень
-            background: '#fff',
-          },
-          success: {
-            iconTheme: {
-              primary: '#10b981', // Зеленый
-              secondary: 'white',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#ef4444', // Красный
-              secondary: 'white',
-            },
-          },
-        }}
-      />
-
-      <Navbar />
-      
-      <main className="flex-grow">
+    <Router>
+      {/* Провайдер авторизации оборачивает всё */}
+      <AuthProvider>
+        {/* Toaster нужен, чтобы работали уведомления. Без него будет ошибка "t is not a function" */}
+        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+        
         <Routes>
+          {/* Публичные страницы */}
           <Route path="/" element={<Home />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/course/:id" element={<CourseDetail />} />
-          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-      </main>
 
-      <Footer />
-    </div>
+          {/* Приватные страницы (только для вошедших) */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Если страница не найдена - на главную */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
 

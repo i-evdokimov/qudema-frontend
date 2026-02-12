@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import { toast } from 'react-hot-toast'; // Убедись, что импорт именно такой
+// ВАЖНО: Правильный импорт для Vite
+import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -13,8 +14,11 @@ export const AuthProvider = ({ children }) => {
     checkUserLoggedIn();
   }, []);
 
+  // Эта функция запускается сама при загрузке страницы
   const checkUserLoggedIn = async () => {
     const token = localStorage.getItem('token');
+    
+    // Если токена нет - мы просто гости, это не ошибка
     if (!token) {
       setLoading(false);
       return;
@@ -25,11 +29,17 @@ export const AuthProvider = ({ children }) => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
+      
       if (data.success) {
         setUser(data.data || data.user);
+      } else {
+        // Если токен протух - удаляем его молча
+        localStorage.removeItem('token');
+        setUser(null);
       }
     } catch (err) {
-      console.error('Ошибка проверки сессии');
+      console.log('Ошибка проверки сессии (это нормально, если сервер спит)');
+      localStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
@@ -49,17 +59,19 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || 'Ошибка входа');
       }
 
-      // Проверяем, где лежат данные (зависит от твоего контроллера)
-      const userData = data.data?.user || data.user;
+      // Сохраняем токен и юзера
       const token = data.data?.token || data.token;
+      const userData = data.data?.user || data.user;
 
       if (token) localStorage.setItem('token', token);
       setUser(userData);
       
-      toast.success('Успешный вход!');
+      // Показываем уведомление ТОЛЬКО здесь, когда юзер сам нажал кнопку
+      toast.success('Добро пожаловать!');
       return { success: true };
     } catch (err) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(err.message || 'Ошибка сервера');
       return { success: false, message: err.message };
     }
   };
@@ -67,7 +79,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
-    toast.success('Вышли из системы');
+    toast.success('Вы вышли из системы');
   };
 
   return (
