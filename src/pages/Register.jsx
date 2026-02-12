@@ -1,153 +1,169 @@
-import { useEffect, useRef, useState } from 'react';
-import Matter from 'matter-js';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiArrowLeft } from 'react-icons/fi';
-import toast from 'react-hot-toast'; // Импорт уведомлений
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import { User, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 const Register = () => {
-  const sceneRef = useRef(null);
-  const engineRef = useRef(null);
-  const [isReloading, setIsReloading] = useState(false);
   const navigate = useNavigate();
-
-  // --- СОСТОЯНИЕ ФОРМЫ ---
+  const { register } = useAuth();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+  
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Обновление полей ввода
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- ЛОГИКА ОТПРАВКИ ---
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Не перезагружать страницу
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    const { name, email, password, confirmPassword } = formData;
-
-    // 1. Проверка на пустые поля
-    if (!name || !email || !password || !confirmPassword) {
-        toast.error('Заполни все поля, не ленись!');
-        return;
+    // 1. Валидация
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Пароли не совпадают');
+      return;
+    }
+    if (formData.password.length < 6) {
+      toast.error('Пароль должен быть длиннее 6 символов');
+      return;
     }
 
-    // 2. Проверка валидности Email (RegEx)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        toast.error('Email какой-то странный. Проверь.');
-        return;
+    setIsLoading(true);
+
+    try {
+      // 2. Подготовка данных для бэкенда
+      // Бэкенд ждет firstName и lastName, а у нас одно поле name
+      const nameParts = formData.name.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || 'Student'; // Если фамилию не ввели
+
+      // 3. Отправка запроса через AuthContext
+      const result = await register({
+        firstName,
+        lastName,
+        email: formData.email,
+        password: formData.password,
+        role: 'student' // По умолчанию регистрируем как ученика
+      });
+
+      if (result.success) {
+        toast.success('Регистрация успешна! Добро пожаловать.');
+        navigate('/dashboard'); // Сразу в кабинет
+      } else {
+        toast.error(result.message || 'Ошибка при регистрации');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Что-то пошло не так. Попробуйте позже.');
+    } finally {
+      setIsLoading(false);
     }
-
-    // 3. Проверка совпадения паролей
-    if (password !== confirmPassword) {
-        toast.error('Пароли не совпадают!');
-        return;
-    }
-
-    // 4. Проверка длины пароля
-    if (password.length < 6) {
-        toast.error('Пароль слишком простой. Минимум 6 символов.');
-        return;
-    }
-
-    // --- УСПЕХ ---
-    // Сохраняем "пользователя" в память браузера (имитация базы данных)
-    const user = { name, email, password };
-    localStorage.setItem('registeredUser', JSON.stringify(user));
-
-    toast.success('Аккаунт создан! Теперь войди.');
-    
-    // Перекидываем на страницу входа через 1.5 секунды
-    setTimeout(() => {
-        navigate('/login');
-    }, 1500);
   };
 
-  // --- ФИЗИКА (БЕЗ ИЗМЕНЕНИЙ) ---
-  const colors = ['#3b82f6', '#facc15', '#ef4444', '#ffffff', '#1e293b'];
-  useEffect(() => {
-    const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, World = Matter.World, Bodies = Matter.Bodies, Composite = Matter.Composite;
-    const engine = Engine.create(); engineRef.current = engine;
-    const render = Render.create({ element: sceneRef.current, engine: engine, options: { width: window.innerWidth, height: window.innerHeight, background: '#f8fafc', wireframes: false, pixelRatio: window.devicePixelRatio }});
-    const wallOptions = { isStatic: true, render: { fillStyle: 'transparent' } };
-    World.add(engine.world, [
-        Bodies.rectangle(window.innerWidth / 2, window.innerHeight + 50, window.innerWidth, 100, wallOptions),
-        Bodies.rectangle(-50, window.innerHeight / 2, 100, window.innerHeight, wallOptions),
-        Bodies.rectangle(window.innerWidth + 50, window.innerHeight / 2, 100, window.innerHeight, wallOptions)
-    ]);
-    Render.run(render);
-    const runner = Runner.create(); Runner.run(runner, engine);
-
-    let count = 0; const maxShapes = 50; let intervalId;
-    const spawnShape = () => {
-        if (count >= maxShapes) { startReloadSequence(); return; }
-        const x = Math.random() * window.innerWidth;
-        const size = Math.random() * 40 + 90;
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const type = Math.floor(Math.random() * 3);
-        const commonStyle = { fillStyle: color, strokeStyle: '#000000', lineWidth: 4 };
-        let body;
-        if (type === 0) body = Bodies.circle(x, -150, size / 2, { render: commonStyle, restitution: 0.8 });
-        else if (type === 1) body = Bodies.rectangle(x, -150, size, size, { render: commonStyle, restitution: 0.6 });
-        else body = Bodies.polygon(x, -150, 3, size / 1.5, { render: commonStyle, restitution: 0.5 });
-        World.add(engine.world, body); count++;
-    };
-    intervalId = setInterval(spawnShape, 200);
-    const startReloadSequence = () => {
-        clearInterval(intervalId); setIsReloading(true);
-        setTimeout(() => { Composite.clear(engine.world, false); 
-            World.add(engine.world, [Bodies.rectangle(window.innerWidth / 2, window.innerHeight + 50, window.innerWidth, 100, wallOptions), Bodies.rectangle(-50, window.innerHeight / 2, 100, window.innerHeight, wallOptions), Bodies.rectangle(window.innerWidth + 50, window.innerHeight / 2, 100, window.innerHeight, wallOptions)]);
-            count = 0; setIsReloading(false); intervalId = setInterval(spawnShape, 200); }, 3000);
-    };
-    return () => { clearInterval(intervalId); Render.stop(render); Runner.stop(runner); if (render.canvas) render.canvas.remove(); };
-  }, []);
-
   return (
-    <div className="relative min-h-screen overflow-hidden font-sans">
-        <div ref={sceneRef} className={`absolute inset-0 z-0 transition-opacity duration-1000 ${isReloading ? 'opacity-20' : 'opacity-100'}`} />
-        {isReloading && (<div className="absolute inset-0 z-10 flex items-center justify-center animate-pulse pointer-events-none"><h2 className="text-5xl md:text-8xl font-black uppercase text-dark bg-white px-8 py-4 border-4 border-dark shadow-[8px_8px_0px_0px_#000]">RELOAD GAME...</h2></div>)}
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] relative overflow-hidden p-4">
+      {/* Фон (Градиентные шары) */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px]" />
 
-        <div className="relative z-20 min-h-screen flex items-center justify-center pointer-events-none">
-            <div className="bg-white border-4 border-dark p-8 md:p-12 max-w-lg w-full shadow-[12px_12px_0px_0px_#ef4444] pointer-events-auto mx-4">
-                <Link to="/login" className="inline-flex items-center gap-2 text-gray-500 hover:text-dark font-bold mb-6 text-sm uppercase"><FiArrowLeft /> Назад к входу</Link>
-                <h1 className="text-4xl font-black uppercase mb-2 text-dark">Регистрация</h1>
-                <p className="text-gray-500 font-bold mb-8">Присоединяйся к тусовке.</p>
-
-                {/* ФОРМА */}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input 
-                        name="name" value={formData.name} onChange={handleChange}
-                        type="text" placeholder="ТВОЕ ИМЯ" 
-                        className="w-full p-4 border-4 border-dark font-bold focus:outline-none focus:shadow-neo transition-shadow"
-                    />
-                    <input 
-                        name="email" value={formData.email} onChange={handleChange}
-                        type="email" placeholder="EMAIL" 
-                        className="w-full p-4 border-4 border-dark font-bold focus:outline-none focus:shadow-neo transition-shadow"
-                    />
-                    <input 
-                        name="password" value={formData.password} onChange={handleChange}
-                        type="password" placeholder="ПРИДУМАЙ ПАРОЛЬ" 
-                        className="w-full p-4 border-4 border-dark font-bold focus:outline-none focus:shadow-neo transition-shadow"
-                    />
-                    <input 
-                        name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
-                        type="password" placeholder="ПОВТОРИ ПАРОЛЬ" 
-                        className="w-full p-4 border-4 border-dark font-bold focus:outline-none focus:shadow-neo transition-shadow"
-                    />
-                    
-                    <button type="submit" className="w-full btn-neo btn-primary py-4 text-xl uppercase mt-4">
-                        Создать аккаунт
-                    </button>
-                </form>
-
-                <p className="text-xs font-bold text-gray-400 mt-6 text-center">Нажимая кнопку, ты соглашаешься учиться.</p>
-            </div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl relative z-10"
+      >
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-2">
+            Создать аккаунт
+          </h1>
+          <p className="text-gray-400 text-sm">Присоединяйся к Qudema и начни учиться</p>
         </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Имя */}
+          <div className="relative group">
+            <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+            <input
+              type="text"
+              name="name"
+              placeholder="Имя и Фамилия"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+              required
+            />
+          </div>
+
+          {/* Email */}
+          <div className="relative group">
+            <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email адрес"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+              required
+            />
+          </div>
+
+          {/* Пароль */}
+          <div className="relative group">
+            <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+            <input
+              type="password"
+              name="password"
+              placeholder="Пароль"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+              required
+            />
+          </div>
+
+          {/* Подтверждение пароля */}
+          <div className="relative group">
+            <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Повторите пароль"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-3 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <Loader2 className="animate-spin h-5 w-5" />
+            ) : (
+              <>
+                Зарегистрироваться <ArrowRight className="h-5 w-5" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center text-sm text-gray-400">
+          Уже есть аккаунт?{' '}
+          <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+            Войти
+          </Link>
+        </div>
+      </motion.div>
     </div>
   );
 };
