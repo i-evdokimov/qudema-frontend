@@ -1,98 +1,27 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
-import toast from 'react-hot-toast';
+// frontend/src/context/AuthContext.jsx
+import { createContext, useState, useContext } from 'react';
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth должен использоваться внутри AuthProvider');
-  }
-  return context;
-};
-
 export const AuthProvider = ({ children }) => {
+  // По умолчанию пользователь null (не вошел)
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  // Проверка авторизации при загрузке
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const response = await authAPI.getCurrentUser();
-        setUser(response.data.data);
-      } catch (error) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
+  // Функция входа (принимает имя)
+  const login = (username) => {
+    setUser({ name: username });
   };
 
-  const login = async (credentials) => {
-    try {
-      const response = await authAPI.login(credentials);
-      const { user, token } = response.data.data;
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-      
-      toast.success('Вход выполнен успешно!');
-      return { success: true };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Ошибка входа';
-      toast.error(message);
-      return { success: false, message };
-    }
-  };
-
-  const register = async (userData) => {
-    try {
-      const response = await authAPI.register(userData);
-      const { user, token } = response.data.data;
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-      
-      toast.success('Регистрация успешна!');
-      return { success: true };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Ошибка регистрации';
-      toast.error(message);
-      return { success: false, message };
-    }
-  };
-
+  // Функция выхода
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
     setUser(null);
-    toast.success('Вы вышли из системы');
-  };
-
-  const value = {
-    user,
-    loading,
-    login,
-    register,
-    logout,
-    isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin',
-    isTeacher: user?.role === 'teacher' || user?.role === 'admin',
-    isStudent: user?.role === 'student'
   };
 
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);

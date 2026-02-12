@@ -1,107 +1,129 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { coursesAPI } from '../services/api';
-import { FiArrowRight, FiZap, FiTarget } from 'react-icons/fi';
+import { FiArrowRight, FiPlay, FiCheckSquare, FiAward } from 'react-icons/fi';
 
 const Home = () => {
-  const [courses, setCourses] = useState([]);
-
-  useEffect(() => {
-    const fetchTopCourses = async () => {
-      try {
-        const response = await coursesAPI.getAll().catch(() => ({ data: [] }));
-        setCourses(response.data ? response.data.slice(0, 3) : []);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchTopCourses();
-  }, []);
+  // Список предметов для бегущей строки
+  const subjectsList = [
+      'МАТЕМАТИКА', 'РУССКИЙ ЯЗЫК', 'ИНФОРМАТИКА', 'ФИЗИКА', 'ХИМИЯ', 
+      'БИОЛОГИЯ', 'ИСТОРИЯ', 'ОБЩЕСТВОЗНАНИЕ', 'ЛИТЕРАТУРА', 'ГЕОГРАФИЯ'
+  ];
+  // Дублируем список
+  const marqueeContent = [...subjectsList, ...subjectsList];
 
   return (
-    <div className="font-sans overflow-hidden">
-      {/* HERO SECTION - Скошенный и дерзкий */}
-      <section className="relative pt-20 pb-32 md:pt-32 md:pb-48 bg-white">
-        {/* Фоновый скошенный блок */}
-        <div className="absolute top-0 right-0 w-2/3 h-full bg-primary-100 border-l-4 border-dark -skew-x-12 transform origin-top-right z-0"></div>
+    <div className="min-h-screen bg-white text-dark overflow-x-hidden">
+      
+      {/* 1. HERO SECTION */}
+      <section className="relative bg-primary-500 border-b-4 border-dark py-20 lg:py-32 overflow-hidden">
         
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="max-w-2xl">
-              {/* Декоративный элемент */}
-              <div className="inline-block bg-accent border-2 border-dark px-4 py-2 font-black uppercase text-sm mb-6 shadow-neo-hover -rotate-2">
-                ⚡️ Набор 2026 открыт
-              </div>
-              
-              <h1 className="text-6xl lg:text-8xl font-black text-dark mb-8 leading-none uppercase tracking-tighter">
-                Взломай <br/>
-                <span className="text-primary-500 text-shadow-neo inline-block transform -skew-x-6 border-b-8 border-primary-500 px-2">
-                  Экзамены
+        {/* ЛОГОТИП Q */}
+        <div className="absolute top-10 right-10 md:top-20 md:right-20 z-0">
+            <Link to="/about" className="group block relative">
+                <div className="absolute top-2 left-2 w-32 h-32 md:w-48 md:h-48 bg-dark rounded-none"></div>
+                <div className="relative w-32 h-32 md:w-48 md:h-48 bg-white border-4 border-dark flex items-center justify-center transform transition-transform group-hover:-translate-x-2 group-hover:-translate-y-2 cursor-pointer">
+                    <span className="font-black text-8xl md:text-9xl text-dark group-hover:text-primary-600 transition-colors">Q</span>
+                    <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-accent px-2 py-1 border-2 border-dark text-xs font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Кто мы?</div>
+                </div>
+            </Link>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10 text-center md:text-left pointer-events-none">
+          <div className="inline-block pointer-events-auto bg-white border-4 border-dark px-4 py-1 mb-6 shadow-[4px_4px_0px_0px_#000] transform -rotate-2">
+            <span className="font-black uppercase tracking-widest text-sm md:text-base">🚀 Подготовка к ЕГЭ 2024</span>
+          </div>
+          
+          <div className="pointer-events-auto">
+            <h1 className="text-5xl md:text-8xl font-black uppercase leading-none mb-8 text-white text-shadow-neo">
+                ВЗЛОМАЙ ЕГЭ.<br />
+                <span className="text-dark bg-accent px-2">ПОСТУПИ В ВУЗ МЕЧТЫ.</span> 
+            </h1>
+            <p className="text-xl md:text-2xl font-bold mb-10 max-w-2xl text-white/90">
+                Никакой воды. Никаких скучных лекций. Только хардкор, практика и реальные знания.
+            </p>
+            <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
+                <Link to="/courses" className="btn-neo bg-white text-dark text-xl px-10 py-4 hover:bg-dark hover:text-white flex items-center gap-3">
+                ВЫБРАТЬ ПРЕДМЕТ <FiArrowRight />
+                </Link>
+                
+                {/* ОБНОВЛЕННАЯ ССЫЛКА НА СТРАНИЦУ ABOUT */}
+                <Link to="/about" className="font-bold underline decoration-4 underline-offset-4 decoration-dark text-dark text-lg hover:text-white transition-colors">
+                    ПОЧЕМУ СТОИТ ВЫБРАТЬ ИМЕННО НАС?
+                </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. БЕСКОНЕЧНАЯ БЕГУЩАЯ СТРОКА */}
+      <div className="bg-accent border-b-4 border-dark py-4 overflow-hidden relative flex whitespace-nowrap">
+        <div className="flex animate-marquee-infinite">
+            {marqueeContent.map((item, index) => (
+                <span key={index} className="text-2xl font-black uppercase tracking-wider text-dark mx-6 flex items-center">
+                    {item} <span className="text-primary-600 ml-6">•</span>
                 </span>
-              </h1>
-              <p className="text-xl text-dark font-bold mb-10 leading-relaxed max-w-lg border-l-4 border-primary-500 pl-6">
-                Онлайн-школа Qudema. Без воды, без стресса, с максимальным результатом. Твой билет в топовый вуз.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-6">
-                <Link to="/courses" className="btn-neo btn-primary text-xl">
-                  Выбрать предмет
-                </Link>
-                <Link to="/register" className="btn-neo btn-secondary text-xl flex items-center justify-center gap-2">
-                   Пробный урок <FiArrowRight/>
-                </Link>
-              </div>
-            </div>
+            ))}
+        </div>
+      </div>
 
-            {/* Правая часть - Имитация фото в рамке */}
-            <div className="relative lg:h-full flex justify-center">
-              {/* Жесткая рамка с тенью */}
-              <div className="relative w-full max-w-md aspect-square bg-dark border-4 border-dark shadow-neo rotate-3 hover:rotate-0 transition-all duration-300 z-20">
-                 <div className="absolute inset-0 bg-gradient-to-tr from-primary-600 to-primary-300 flex flex-col items-center justify-center p-10 opacity-90 border-4 border-white m-1">
-                    <span className="text-9xl mb-4 drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">🚀</span>
-                    <p className="text-white text-2xl font-black text-center uppercase transform -skew-x-6">Qudema Team</p>
-                 </div>
-              </div>
-               {/* Декоративный задний фон */}
-               <div className="absolute top-10 -right-10 w-full h-full border-4 border-primary-500 bg-transparent z-10 -rotate-6"></div>
-            </div>
+      {/* 3. НОВАЯ СЕКЦИЯ: КАК ПРОХОДИТ ОБУЧЕНИЕ (ВМЕСТО "ПОЧЕМУ МЫ") */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+             <h2 className="text-4xl md:text-6xl font-black uppercase bg-white border-4 border-dark inline-block px-4 py-2 shadow-neo">
+                КАК ПРОХОДИТ ОБУЧЕНИЕ?
+             </h2>
+             <p className="mt-4 font-bold text-gray-500">Простой алгоритм твоего успеха</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 relative">
+             {/* Линия соединения для десктопа (декор) */}
+             <div className="hidden md:block absolute top-1/2 left-0 w-full h-2 bg-dark -z-10 transform -translate-y-1/2 border-y-2 border-dashed border-gray-400"></div>
+
+             {/* ШАГ 1 */}
+             <div className="bg-white p-8 border-4 border-dark shadow-neo relative">
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-primary-600 text-white w-12 h-12 flex items-center justify-center font-black text-xl border-4 border-dark">1</div>
+                <div className="h-40 flex items-center justify-center text-6xl text-primary-600">
+                    <FiPlay />
+                </div>
+                <h3 className="text-2xl font-black uppercase text-center mb-2">Смотришь</h3>
+                <p className="text-center text-gray-600 font-bold">Короткие видео-уроки. Только суть, без лишней болтовни.</p>
+             </div>
+
+             {/* ШАГ 2 */}
+             <div className="bg-white p-8 border-4 border-dark shadow-neo relative mt-8 md:mt-0">
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-accent text-dark w-12 h-12 flex items-center justify-center font-black text-xl border-4 border-dark">2</div>
+                <div className="h-40 flex items-center justify-center text-6xl text-accent">
+                    <FiCheckSquare />
+                </div>
+                <h3 className="text-2xl font-black uppercase text-center mb-2">Решаешь</h3>
+                <p className="text-center text-gray-600 font-bold">Домашка после каждого урока. Автопроверка и разбор ошибок.</p>
+             </div>
+
+             {/* ШАГ 3 */}
+             <div className="bg-white p-8 border-4 border-dark shadow-neo relative mt-8 md:mt-0">
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-dark text-white w-12 h-12 flex items-center justify-center font-black text-xl border-4 border-white">3</div>
+                <div className="h-40 flex items-center justify-center text-6xl text-dark">
+                    <FiAward />
+                </div>
+                <h3 className="text-2xl font-black uppercase text-center mb-2">Сдаешь</h3>
+                <p className="text-center text-gray-600 font-bold">Пробники каждый месяц. Идешь на экзамен уверенным.</p>
+             </div>
           </div>
         </div>
       </section>
 
-      {/* ПРИНЦИПЫ - Рваный разделитель */}
-      <section className="bg-dark text-white py-20 relative">
-        {/* Рваный верхний край (SVG clip-path имитация) */}
-        <div className="absolute top-0 left-0 w-full overflow-hidden leading-none rotate-180">
-            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block h-[60px] w-full fill-white">
-                <path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" className="shape-fill"></path>
-            </svg>
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10 pt-10">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-             <h2 className="text-4xl font-black uppercase tracking-tight mb-4">Наши принципы</h2>
-             <div className="w-24 h-2 bg-primary-500 mx-auto"></div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 border-4 border-primary-500 bg-dark shadow-neo-white transform hover:-translate-y-2 transition-all">
-              <FiZap className="text-5xl text-primary-400 mb-6" />
-              <h3 className="text-2xl font-black uppercase mb-4">Скорость</h3>
-              <p className="text-gray-300 font-medium">Учим решать задачи быстрее, чем требует экзамен. Экономим время на нервах.</p>
-            </div>
-            <div className="p-8 border-4 border-white bg-primary-600 text-dark shadow-neo transform hover:-translate-y-2 transition-all md:-mt-8">
-              <FiTarget className="text-5xl text-dark mb-6" />
-              <h3 className="text-2xl font-black uppercase mb-4">Результат</h3>
-              <p className="font-bold">Мы не учим "для общего развития". Мы натаскиваем на максимальный балл.</p>
-            </div>
-            <div className="p-8 border-4 border-primary-500 bg-dark shadow-neo-white transform hover:-translate-y-2 transition-all">
-              <span className="text-5xl mb-6 block">🧠</span>
-              <h3 className="text-2xl font-black uppercase mb-4">Система</h3>
-              <p className="text-gray-300 font-medium">Четкая структура знаний. Никакого хаоса в голове перед экзаменом.</p>
-            </div>
-          </div>
+      {/* 4. CTA */}
+      <section className="bg-dark text-white py-20 border-t-4 border-dark">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl md:text-6xl font-black uppercase mb-8">
+            ХВАТИТ ОТКЛАДЫВАТЬ.<br />ВРЕМЯ <span className="text-primary-500 underline decoration-white">ДЕЙСТВОВАТЬ</span>.
+          </h2>
+          <Link to="/courses" className="inline-block bg-accent text-dark border-4 border-white text-2xl font-black uppercase px-12 py-5 shadow-[8px_8px_0px_0px_#fff] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+            ЗАПИСАТЬСЯ СЕЙЧАС
+          </Link>
         </div>
       </section>
+
     </div>
   );
 };

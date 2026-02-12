@@ -2,40 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-gray-50 text-gray-900;
-  }
-}
+/* -- ТВОЙ КАСТОМНЫЙ CSS НИЖЕ -- */
 
-@layer components {
-  .btn-primary {
-    @apply px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 font-medium;
-  }
-  
-  .btn-secondary {
-    @apply px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium;
-  }
-  
-  .input-field {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
-  }
-  
-  .card {
-    @apply bg-white rounded-lg shadow-md p-6;
-  }
-}
-
-/* Добавляем в конец файла */
 body {
-  /* Технологичный фон в точку/сетку */
   background-color: #f8fafc;
+  /* Сетка на фоне */
   background-image:  radial-gradient(#06b6d4 0.5px, transparent 0.5px), radial-gradient(#06b6d4 0.5px, #f8fafc 0.5px);
   background-size: 20px 20px;
   background-position: 0 0, 10px 10px;
 }
 
-/* Классы для кнопок в новом стиле */
+/* Классы кнопок */
 .btn-neo {
   @apply px-6 py-3 font-bold uppercase tracking-wider border-2 border-dark shadow-neo transition-all active:shadow-neo-hover active:translate-x-[2px] active:translate-y-[2px];
 }
@@ -46,4 +23,28 @@ body {
 
 .btn-secondary {
   @apply bg-white text-dark hover:bg-gray-100;
+}
+
+/* Тень для текста */
+.text-shadow-neo {
+  text-shadow: 2px 2px 0px #18181b;
+  color: white;
+}
+
+/* АНИМАЦИЯ БЕГУЩЕЙ СТРОКИ */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    /* Сдвигаем на 50%, так как мы дублируем контент */
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: fit-content;
+  /* 30s - время одного полного цикла, linear - равномерная скорость */
+  animation: marquee 30s linear infinite;
 }

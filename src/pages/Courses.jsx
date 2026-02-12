@@ -1,197 +1,98 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { coursesAPI } from '../services/api';
-import { FiSearch, FiFilter, FiArrowRight } from 'react-icons/fi';
+import { FiFilter, FiArrowRight, FiBook, FiActivity, FiCpu, FiGlobe, FiHexagon } from 'react-icons/fi';
+// ИМПОРТИРУЕМ НАШУ БАЗУ ДАННЫХ
+import { COURSES } from '../coursesData';
 
 const Courses = () => {
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedSubject, setSelectedSubject] = useState('Все');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState('Все');
 
-  // Список предметов для фильтра
-  const subjects = ['Все', 'Математика', 'Информатика', 'Русский язык', 'Физика', 'Обществознание'];
+  // Уникальные категории для кнопок
+  const categories = ['Все', ...new Set(COURSES.map(c => c.category))];
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await coursesAPI.getAll().catch(() => null);
-        
-        if (response && response.data && response.data.length > 0) {
-          setCourses(response.data);
-        } else {
-          // ФЕЙКОВЫЕ ДАННЫЕ (ЧТОБЫ НЕ БЫЛО БЕЛОГО ЭКРАНА)
-          // Если база пустая или ошибка, показываем примеры
-          setCourses([
-            {
-              id: 1,
-              title: 'ЕГЭ по Информатике 2026',
-              description: 'Полный курс подготовки на 90+. Python, Excel, теория игр и программирование.',
-              price: '4 500',
-              subject: 'Информатика',
-              grade: '11',
-              thumbnail: null
-            },
-            {
-              id: 2,
-              title: 'Профильная Математика: Взлом',
-              description: 'Разбираем вторую часть. Параметры, планиметрия и теория чисел.',
-              price: '3 900',
-              subject: 'Математика',
-              grade: '11',
-              thumbnail: null
-            },
-            {
-              id: 3,
-              title: 'Русский язык: Сочинение',
-              description: 'Идеальное сочинение за 2 недели. Клише, аргументы и проверка экспертом.',
-              price: '2 500',
-              subject: 'Русский язык',
-              grade: '11',
-              thumbnail: null
-            }
-          ]);
-        }
-      } catch (err) {
-        console.error('Ошибка:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Фильтрация
+  const filteredCourses = filter === 'Все' 
+    ? COURSES 
+    : COURSES.filter(c => c.category === filter);
 
-    fetchCourses();
-  }, []);
-
-  // Фильтрация курсов
-  const filteredCourses = courses.filter(course => {
-    const matchesSubject = selectedSubject === 'Все' || course.subject === selectedSubject;
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSubject && matchesSearch;
-  });
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-xl font-bold text-gray-400 animate-pulse">Загрузка каталога...</div>
-    </div>
-  );
+  // Функция для выбора иконки
+  const getIcon = (type) => {
+    switch(type) {
+        case 'math': return <FiActivity className="text-4xl mb-4 text-primary-600" />;
+        case 'book': return <FiBook className="text-4xl mb-4 text-accent" />;
+        case 'atom': return <FiHexagon className="text-4xl mb-4 text-blue-500" />;
+        case 'flask': return <FiCpu className="text-4xl mb-4 text-green-500" />; // Используем Cpu как абстракцию или замени на другую
+        case 'dna': return <FiActivity className="text-4xl mb-4 text-green-600" />;
+        case 'people': return <FiGlobe className="text-4xl mb-4 text-orange-500" />;
+        default: return <FiBook className="text-4xl mb-4 text-dark" />;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Заголовок страницы */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-12">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Каталог курсов</h1>
-          <p className="text-gray-500 text-lg max-w-2xl">
-            Выбери предмет, преподавателя и начни подготовку к экзаменам уже сегодня.
+    <div className="min-h-screen bg-white pb-20">
+      
+      {/* ХЕДЕР КАТАЛОГА */}
+      <div className="bg-dark text-white pt-24 pb-12 border-b-4 border-dark">
+        <div className="container mx-auto px-4">
+          <h1 className="text-5xl md:text-7xl font-black uppercase mb-6 tracking-tighter">
+            КаталÓг <span className="text-accent">курсов</span>
+          </h1>
+          <p className="text-xl text-gray-400 max-w-2xl font-bold">
+            Выбирай свое оружие для битвы с экзаменами. Цены, от которых не дергается глаз.
           </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Сайдбар с фильтрами (на мобиле будет сверху) */}
-          <aside className="lg:w-1/4">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
-              
-              {/* Поиск */}
-              <div className="relative mb-8">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Поиск курса..." 
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+      {/* ФИЛЬТРЫ */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex flex-wrap gap-4 items-center mb-12">
+          <div className="flex items-center gap-2 font-black uppercase text-xl mr-4">
+            <FiFilter /> Фильтр:
+          </div>
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`px-6 py-2 border-4 border-dark font-bold uppercase transition-all shadow-[4px_4px_0px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none
+                ${filter === cat ? 'bg-primary-500 text-white' : 'bg-white text-dark hover:bg-gray-100'}`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* СЕТКА КУРСОВ */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredCourses.map(course => (
+            <Link 
+              to={`/course/${course.id}`} 
+              key={course.id}
+              className="group block bg-white border-4 border-dark p-8 shadow-neo hover:-translate-y-2 transition-transform duration-200 relative overflow-hidden"
+            >
+              {/* Бейдж уровня (ОГЭ/ЕГЭ) */}
+              <div className="absolute top-0 right-0 bg-dark text-white text-xs font-bold px-3 py-1 border-b-4 border-l-4 border-white">
+                {course.level}
               </div>
 
-              {/* Фильтр предметов */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FiFilter /> Предметы
-                </h3>
-                <div className="space-y-2">
-                  {subjects.map(subject => (
-                    <button
-                      key={subject}
-                      onClick={() => setSelectedSubject(subject)}
-                      className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        selectedSubject === subject 
-                          ? 'bg-primary-600 text-white shadow-md' 
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
-                    >
-                      {subject}
-                    </button>
-                  ))}
+              {getIcon(course.image)}
+
+              <h3 className="text-2xl font-black uppercase mb-4 leading-tight group-hover:text-primary-600 transition-colors">
+                {course.title}
+              </h3>
+              
+              <div className="w-12 h-2 bg-accent mb-6"></div>
+
+              <div className="flex justify-between items-end mt-auto">
+                <div>
+                   <span className="block text-xs font-bold text-gray-500 uppercase">Стоимость</span>
+                   <span className="text-3xl font-black text-dark">{course.price}</span>
+                </div>
+                <div className="w-10 h-10 bg-dark text-white flex items-center justify-center group-hover:bg-accent group-hover:text-dark transition-colors">
+                  <FiArrowRight size={20} />
                 </div>
               </div>
-            </div>
-          </aside>
-
-          {/* Сетка курсов */}
-          <div className="lg:w-3/4">
-            {filteredCourses.length > 0 ? (
-              <div className="grid md:grid-cols-2 gap-6">
-                {filteredCourses.map((course) => (
-                  <div key={course.id} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
-                    {/* Картинка курса */}
-                    <div className="h-48 bg-gray-200 relative overflow-hidden">
-                      {course.thumbnail ? (
-                        <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                           <span className="text-6xl">🎓</span>
-                        </div>
-                      )}
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm uppercase tracking-wide">
-                          {course.subject}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Контент */}
-                    <div className="p-6 flex flex-col flex-grow">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
-                          {course.title}
-                        </h3>
-                      </div>
-                      
-                      <p className="text-gray-500 text-sm mb-6 line-clamp-2 flex-grow">
-                        {course.description}
-                      </p>
-
-                      <div className="pt-4 border-t border-gray-50 flex items-center justify-between mt-auto">
-                        <div>
-                          <p className="text-xs text-gray-400 font-medium uppercase">Стоимость</p>
-                          <p className="text-xl font-extrabold text-gray-900">{course.price} ₽</p>
-                        </div>
-                        <Link 
-                          to={`/courses/${course.id}`} 
-                          className="w-10 h-10 rounded-full bg-gray-100 text-gray-900 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all"
-                        >
-                          <FiArrowRight size={20} />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
-                <p className="text-gray-500 text-lg">По вашему запросу ничего не найдено.</p>
-                <button 
-                  onClick={() => {setSelectedSubject('Все'); setSearchQuery('')}}
-                  className="mt-4 text-primary-600 font-bold hover:underline"
-                >
-                  Сбросить фильтры
-                </button>
-              </div>
-            )}
-          </div>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
