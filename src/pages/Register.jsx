@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-// 1. Импортируем компонент фона
-import FallingShapes from '../components/FallingShapes';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -40,8 +38,6 @@ const Register = () => {
 
   return (
     <div className="min-h-[calc(100vh-80px)] relative flex flex-col items-center justify-center p-4 overflow-hidden">
-      {/* 2. Вставляем фон с вариантом 'register' (другие цвета) */}
-      <FallingShapes variant="register" />
       
       {/* Основной контейнер формы */}
       <div className="relative z-10 w-full max-w-md">
