@@ -1,18 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import './index.css';
-// Импортируем провайдер
-import { AuthProvider } from './context/AuthContext'; 
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css' // Если у тебя есть стили, если нет - удали эту строку
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      {/* ОБОРАЧИВАЕМ APP */}
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
+    <App />
   </React.StrictMode>,
-);
+)
