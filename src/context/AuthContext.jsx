@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import toast from 'react-hot-toast'; 
+import toast from 'react-hot-toast';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://qudema-backend.onrender.com/api'; // Убедись, что тут адрес твоего Render!
 
 const AuthContext = createContext();
 
@@ -45,35 +45,11 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-
       if (!data.success) throw new Error(data.message || 'Ошибка входа');
 
       localStorage.setItem('token', data.data?.token || data.token);
       setUser(data.data?.user || data.user);
-      toast.success('С возвращением!');
-      return { success: true };
-    } catch (err) {
-      toast.error(err.message);
-      return { success: false, message: err.message };
-    }
-  };
-
-  // ВОТ ЭТО МЫ ВЕРНУЛИ:
-  const register = async (userData) => {
-    try {
-      const res = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
-      const data = await res.json();
-
-      if (!data.success) throw new Error(data.message || 'Ошибка регистрации');
-
-      localStorage.setItem('token', data.data?.token || data.token);
-      setUser(data.data?.user || data.user);
-      
-      toast.success('Регистрация успешна!');
+      toast.success('Добро пожаловать!');
       return { success: true };
     } catch (err) {
       toast.error(err.message);
@@ -87,8 +63,29 @@ export const AuthProvider = ({ children }) => {
     toast.success('Выход выполнен');
   };
 
+   // Не забудь функцию регистрации! В твоем приложенном файле её не было в return
+  const register = async (userData) => {
+    try {
+        const res = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Ошибка регистрации');
+        
+        localStorage.setItem('token', data.data?.token || data.token);
+        setUser(data.data?.user || data.user);
+        toast.success('Регистрация успешна!');
+        return { success: true };
+    } catch (err) {
+        toast.error(err.message);
+        return { success: false, message: err.message };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
